@@ -16,6 +16,11 @@ import {sortByUsername} from 'mattermost-redux/utils/user_utils';
 import * as Autocomplete from 'app/constants/autocomplete';
 import {getCurrentLocale} from 'app/selectors/i18n';
 
+const isMatchingUser = (profile, matchTerm) =>
+    profile.username.toLowerCase().includes(matchTerm) || profile.email.toLowerCase().includes(matchTerm) ||
+    profile.first_name.toLowerCase().includes(matchTerm) || profile.last_name.toLowerCase().includes(matchTerm) ||
+    `${profile.first_name.toLowerCase()} ${profile.last_name.toLowerCase()}`.startsWith(matchTerm);
+
 export const getMatchTermForAtMention = (() => {
     let lastMatchTerm = null;
     let lastValue;
@@ -73,9 +78,7 @@ export const filterMembersInChannel = createSelector(
         let profiles;
         if (matchTerm) {
             profiles = profilesInChannel.filter((p) => {
-                return (p.delete_at === 0 && (
-                    p.username.toLowerCase().includes(matchTerm) || p.email.toLowerCase().includes(matchTerm) ||
-                    p.first_name.toLowerCase().includes(matchTerm) || p.last_name.toLowerCase().includes(matchTerm)));
+                return p.delete_at === 0 && isMatchingUser(p, matchTerm);
             });
         } else {
             profiles = profilesInChannel.filter((p) => p.delete_at === 0);
@@ -97,12 +100,7 @@ export const filterMembersNotInChannel = createSelector(
         let profiles;
         if (matchTerm) {
             profiles = profilesNotInChannel.filter((p) => {
-                return (
-                    p.username.toLowerCase().includes(matchTerm) ||
-                    p.email.toLowerCase().includes(matchTerm) ||
-                    p.first_name.toLowerCase().includes(matchTerm) ||
-                    p.last_name.toLowerCase().includes(matchTerm)
-                ) && p.delete_at === 0;
+                return isMatchingUser(p, matchTerm) && p.delete_at === 0;
             });
         } else {
             profiles = profilesNotInChannel.filter((p) => p.delete_at === 0);
@@ -127,8 +125,7 @@ export const filterMembersInCurrentTeam = createSelector(
         let profiles;
         if (matchTerm) {
             profiles = [...profilesInTeam, currentUser].filter((p) => {
-                return (p.username.toLowerCase().includes(matchTerm) || p.email.toLowerCase().includes(matchTerm) ||
-                    p.first_name.toLowerCase().includes(matchTerm) || p.last_name.toLowerCase().includes(matchTerm));
+                return isMatchingUser(p, matchTerm);
             });
         } else {
             profiles = [...profilesInTeam, currentUser];

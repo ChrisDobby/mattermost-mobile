@@ -133,5 +133,8 @@ describe('Selectors.Autocomplete', () => {
 
         profiles = filterMembersInChannel(state, 'example');
         expect(profiles.length).toBe(2);
+
+        profiles = filterMembersInChannel(state, 'removed fri');
+        expect(profiles).toHaveLength(1);
     });
 });
